@@ -1,0 +1,26 @@
+spring:
+  thymeleaf:
+    # 模版前后缀
+    prefix: classpath:/templates/
+    suffix: .html
+  datasource:
+    url: jdbc:mysql://localhost:3306/miaosha?characterEncoding=utf-8
+    username: root
+    password: root123
+    driver-class-name: com.mysql.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+  redis:
+    host: 127.0.0.1
+    port: 6379
+
+
+
+
+mybatis:
+  type-aliases-package: com.imooc.pro4pro4Interview.miaosha.domain
+  configuration:
+#    下划线转驼峰
+    map-underscore-to-camel-case: true
+    default-fetch-size: 100
+    default-statement-timeout: 3000
+  mapper-locations: classpath:com/imooc/pro4pro4Interview/miaosha/dao/*.xml

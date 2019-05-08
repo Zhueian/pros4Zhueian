@@ -1,0 +1,20 @@
+
+
+                                BIO NIO AIO(NIO2.0) Netty
+
+    1.netty封装nio；
+
+    2.BIO-BlockingIO：thread per client；
+server：a.serverSocket.accept();->阻塞方法；
+        socket.getInputStream.read(Byte b);
+        socket.getOutputStream.write(Byte b);
+socket是单向的，读就读，写就写。
+        TODO 阻塞怎么实现的。跟锁的区别？
+
+
+    3。cpu比磁盘快1千万倍吧；比网络也快几百万倍，所以要优化IO
+
+    4。阻塞非阻塞，异步同步
+
+    5。NIO单线程模型new non-blocking，Linux参数FD_SETSIZE影响单线程的最大client数
+

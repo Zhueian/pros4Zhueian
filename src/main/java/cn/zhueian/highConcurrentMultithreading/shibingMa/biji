@@ -1,0 +1,184 @@
+
+
+         billbill 马士兵高并发多线程笔记
+
+
+1。一个程序里边不同的执行路径可以放在不同的cpu里边同步运行的东西，成为线程。
+
+2。synchronized，在static中锁定是xxx.class，是Class的实例对象
+
+3。解决脏读dirthRead的方法，copyOnWrite
+
+4。syn为可重入锁，即是syn里调用syn，子类syn method调用父类的syn method
+    锁对象标记一个field会加锁一次++而已，还是同一个锁对象。
+
+5。syn throw ex会释放锁
+
+6。volatitle能修饰成员数组吗？？
+
+7。别用string lock="hello"等字符串常量作为syn锁，容易死锁还不好debug。jetty有这个bug
+
+8。volatitle解决的线程间可见性，syn解决可见，原子性，vola比syn性能高很多。
+
+9。int i = 0；
+    method（）{i++;}不是原子性的。
+    简单的++，等算数原子运算可以用AtomicXXX解决。
+
+10。syn的代码块（粒度）越小越效率好。
+
+11。syn的锁对象可以改变状态属性，但不能改变引用、。
+    锁对象本质还是堆内存（线程共享的）里的实例而不是栈线程私有空间内存的引用变量。
+
+12。wait（）释放锁，notify（all）（）不释放锁。能不用别用，超过两个线程就不好了。
+
+13。while（true）很消耗cpu
+
+14。不涉及同步只涉及通信，
+    考虑countdownlatch/cyclicbarrier/semaphore
+    ，syn+wait/notify太重，太原始。相当于用汇编编程
+
+
+15。java高并发主要有三块：
+    a：同步器synchronizer，同步容器corrounHashMap等，threadPool，execctor
+    b：
+
+
+
+16。TODO 棋牌服务器，只能支持几千人，还不能跨服；
+    但没有挖掘性能，其实可以几百万人（梦幻，lol），用netty等
+    挎服是能得共享session的，redis能解决？
+
+17。ReentrantLock:
+    1.必须手动unlock，throw ex 不会自动解锁，finally unlock。
+    2.syn是悲观锁，会死等锁的释放。bool lock = rLock.trylock(time);
+                                if（lock）rLock.unlock，没锁也unlock会ex
+                                有点乐观锁的意味了。
+    3。bool lock = rlock.lockInterruptibly(),能被主线程打断。
+    4。可以指定为公平锁，默认的syn都是不公平锁。jdk的线程优先级真不靠谱。
+        a：不公平即是竞争，效率高，不用线程调度器调度哪个线程等待时间更长。等1s和等1d的一起竞争锁。
+        b：谁等时间长谁先得到锁。new ReentranLock(true)
+    5。rlock.condition.await(wait)/signalAll(notifyAll),能叫醒全部生产/消费线程而不是全部线程（syn+wait/notify）；
+
+18。effictive java一本书写高级java编程技巧的，
+    说wait有 9成9跟while一起使用而不是if；因为一般不会一个消费者一个生产者两线程这么理想。
+    永远多使用notifyAll，少用notify；
+
+19。threadLocal：空间换时间；syn：时间换空间
+    TODO threadLocal内存泄漏，remove（）//清空threadLocal；？？大黄和池陈宇的那个问题。
+
+20.多线程面试语录：
+    1。其实多线程，现在企业级多线程高并发实际用的没有或者就那么点。但是身为java高级，是不能不会。掌握了juc等不会有坏处。
+    2。多线程编程debug，得加点模拟性的睡眠代码，能放大多线程打断，中断,调度，切换，网络延时等不好发现的bug，又是不加睡眠测试1w次都没问题，一道生产就有问题。
+    3。特别是一些非原子操作间加sleep，eg：vetor.size>0;sleep();vetor.remove(0);
+                 线程间加睡眠eg：new Thread(a::m1).start();sleep();new Thread(b::m1).start();
+
+21。TODO 游戏服务器和web服务器。
+
+22。并发容器：
+    map/set:
+
+        2。ConcurrentHashMap,与hashTable；HashMap->Collections.synchroniedXXX比容器初始化了16段，分为16个锁，能并发了，锁粒度更细。
+        3.ConcurrentSkipListMap，高并发，并且排序，即是有写操作效率不高（插入+排序）
+        4.HashTable,所有API实现都带锁
+        5。HashMap->Map m = Collections.synchroniedXXX(new HashMap())是成了带锁实现了。装饰模式 io包
+        6。TreeMap LinkedHashMap,有序，不安全。
+    copyOnwriteList，写时复制：并发下，写效率低，读效率高；读不加锁，写会加锁，有个复制新list并且对其写操作。
+        1。copyOnWriterArrayList
+        2.vetory
+        3.arrayList
+        多线程写操作c < v，读操作c > v
+    Queue:
+        ConcurrentQueue:
+            1.ConcurrentLinkedQueue.poll(),没有则得到null，但是add得认为得不能add null对象；
+              用cas compare and set指令，和AtmoicXXX类一样，效率比syn高多了。
+              无界队列，内存耗完为止，offer/add，效果一样，只是返回值不同罢了；
+              poll 拿出来并且队列没有拿出来那个引用了；
+              peek 拿出来并且队列还有拿出来那个引用了；
+            2.COncurrentArrayQueue,有界队列，add方法到初始化或自定义极限后会抛异常，一般用offer
+            3。Deque,双向队列
+        BlockQueue:阻塞就是线程等待，wait/notify
+            LinkedBlockQueue:无界阻塞队列。
+            ArrayBlickQueue(int size):有界阻塞队列：
+                满了就不能生产，只能消费，不用同步判断。
+                add，越界会异常
+                offer，越界就会返回false，重写method能加time，
+                put，满了会阻塞，线程put线程无限阻塞在put方法行，
+        DelayQueue:无界，从进去那刻每个元素（通常存任务task）都记载过多久才能别消费者拿走；
+            等待时间最长的先往外拿的顺序而不是插入顺序；
+            一般做定时执行任务队列。
+        TransferQueue/:
+            linkedTransferQueue:transfer:生产线程往队列发，若有消费线程就直接给消费线程而不存队列，
+                若无，则阻塞在当前线程当前行。
+                更精确的控制，生产的东西必须消费否则阻塞，实时消息，等
+        SynchronusQueue：容量为零，add会直接ex，put会阻塞等待消费线程take，底层用transfer
+
+23。juc5-11，断断续续不断完善。有很多高级的内容。
+
+24。CountdownLatch（int times），里面的time==0，门闩打开；
+    latch.await();
+    latch.count();
+
+25。死锁，syn里面syn；
+
+26.FutureTask 会等待一个Callable，返回值是个泛形，会阻塞到得到这个值为止。
+    System.out.println(FutureTask.get()) -> 会一直阻塞mian方法知道，新开的thread执行万task，得到返回值为止。
+
+27。Excutorservice.shutdown()也是阻塞，知道线程池所有任务为止；shutdownNow就不是了。
+
+28。TODO 工作窃取并行算法？
+
+    newWorkSteadingPool(),工作窃取线程池：
+        每个线程都有个自己维护的队列，
+        自己线程里面的任务执行完了会区窃取别的线程维护的没执行完的任务；
+        是daemon线程；
+        底层是ForkJoinPool（）实现；
+        线程数：Runtime.getRuntime().availableProcessors(),cpu核数；
+
+29。newFIxedTHreadPool（int num）固定线程数线程池，
+    用LinkedBlockingQueue维护线程池。
+
+30。newCacheThreadPool默认线程idot时间60s，之后销毁。
+    用SynchrousQueue维护线程池
+
+31。newSingleThreadPool.保证任务顺序执行；
+    其他Pool多个线程不保证任务顺讯执行，得多行程通信才能保证。
+    用LinkedBlockingQueue维护线程池。
+
+32。newScheduleThreadPool(int nums)跟DelayQueue一样，执行定时任务。
+    用DelayedWorQueue维护线程池 -> super.BlockingQueue维护线程池
+
+
+33。ForkJoinPool().分叉合并池
+    有点想大数据mapReduce概念：分而治之
+    必须执行实现ForkJoinTask的子类作为任务submit/commit，如下子类：
+        RecursiveAction:递归，无返回值
+        RecursiveTask:递归，有返回值。
+    jdk自身维护这个递归，但是规则可以自定义。
+    fork()/join()是阻塞，所以不管是不是deamon线程，主线程不用阻塞了System.in.read();
+    线程中的线程。
+
+34.ParallelStreamAPI默认开启多线程。
+
+35。这些东西又不是古诗名言，记他干嘛呢，会查不就得了呗。
+
+36.syn锁的是对象，而不是什么方法，什么代码块。
+
+TODO 37：方法的局部变量栈私有？
+     38：活锁live？只存在理论上的bug
+     39：jmm java memory model
+     40：volatile和synchronized区别？
+     41：syn——volatileDemo2的join()??
+
+37。一般几个cpu核数就几个线程执行一个方法，不要在同一个cou上坐过多的线程切换
+
+38.volatile修饰引用对象时候，不要以为cpu缓存的的是整个对象，而只手对象的一些属性和基本类型。
+
+39。但凡阻塞方法都有throws InterruptException()!
+
+40。阻塞队列就不会抛null 和 full 异常了，满了/空了会阻塞！
+
+41.TODO 什么只有ConcurrentLinkedQueue而没有ConcurrentArrayQueue,
+
+42。TODO 分片下载，千万级poi  io那怎么做？？？
+
+43.TODO 线程池的策略怎么指定？？

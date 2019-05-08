@@ -1,0 +1,12 @@
+1.逻辑上的过滤逻辑会无限无限制的扩展
+2。hds的售卖折扣规则：也是无限拓展的，只要实现折扣过滤接口，doFilter()返回值<T>，后按一定顺序加上一个链节点就行。
+    for(Filter[]:ZhekouFIlter) -> ZhekouChain();
+3。有些第一个过滤节点就会if判断是否能进入下一个过滤节点（敏感信息
+4。两个链条的插入，等组合，可以用ArrayList代替数组，操作ArrayList方；或者Fiterchain impl Filter，把FIterChain看作一个Filter黑盒子
+5。乐游商城的图片权限，等链式问题
+6.TODO 责任链过滤器中断：不调下一个dofilter()
+
+7.TODO reator 设计模式？
+
+8.构架改动越少，迭代代码容易，封装变化
+

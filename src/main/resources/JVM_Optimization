@@ -1,0 +1,104 @@
+
+
+              JVM_optimization:JVM优化
+a：博学谷
+    2:jvm的运行参数
+        2.4-XX参数：
+            2.4.1:  -Xms&-Xmx参数
+                属于-XX参数，jvm堆内存初始化大小和最大大小。
+                -Xmx2048m：等价与-XX：MaxHeapSize，最大堆内存大小。
+                -Xms512m：等价于-XX：InitialHeadSize，初始化堆内存大小。
+                eg:java -Xms512m -Xmx2048m xxx(.class)
+            2.6:查看jvm的运行参数
+                2.6.1:运行java命令时打印运行参数（还没启动正要敲回车启动）
+                    eg:java -xx:PrintFlagsFinal xxx(.class)
+                                        ……
+                                       bool UserMember =false {pd product}
+                                       intx UseSSE :=5 {product}
+                                       其中 = 为默认值， := 为修改值
+                2.6.2:查看正在运行的java进程的参数：
+                    eg:tomcat/bin/startup.sh 跑一个tomcat
+                       a:ps -ef | grep tomcat查看tomcat进程id or jps -l查看java相关全包名进程
+                       b:jinfo -flags <进程id>
+                        …… -XX:MaxHeadSize=48863641
+                       c:jinfo -flag MaxHeadSize <进程id>
+    《========》
+    3:jvm内存模型
+        3.1:jdk7:
+            Young:
+                  1.Eden,伊甸园，new小对象，Eden满了，GC将存活的对象转移到空闲的Survivor区
+                  2.Survivor（space）：两个大小严格一致的Survivor，（Survivor From<=>Survivor TO）时刻点里只有一个会被使用，
+                              另一个留作GC时复制对象用根据jvm策略，几次GC后依旧存活的对象转移到Tenured；
+                              new大对象直接进入此区。
+
+                  4.Virtual
+            Tenured年老区
+                  1.Virtual,主要保存生命周期比较长的对象。比如在Young区一定次数复制转移后会转移到Tenured；系统中用了
+                    application级别的缓存，而缓存中的对象往往转移到这一区间。对象也有可能会被回收。
+            Perm永久区
+                  1.Virtual，主要保存cLass，method，field对象，tomcat部署应用会加载这些类或者接口，一般不会溢出，
+                    除非一次加载很多类。
+                    比如：热部署的应用项目中，java.lang.OutOfMemoryError:PermGen space,可能就是每次的重新部署
+                         后类的cLass没有被卸载（GC），大量的class保存在Perm。得重启项目了。
+            Virtual：指的是最大内存和初始化内存的差值。
+        3.2:jdk8:
+            相较于jdk7，Perm被MetaSpace（元数据空间）替代，Metaspace所占的空间不想Perm占据jvm内部空间，
+            而是本地（内存条）的内存空间，更底层了，而不是加一层壳的jvm上跑，效率高了。
+            以前经常
+                1:java.lang.OutOfMemoryError:PermGen space（java程序员内存把控不好，不想C++）
+                2:为了融合HotSpot JVM与JRockit VM（Oracle收购的另一个JVM），其中JRockit没有永久代不配永久带，两个优秀的jvm。
+            MetaSpace：
+                CCS（bool）：类压缩指针，开启会使用这个区域，反之关闭，可以自定义
+                CodeCache：一些class，method，field类
+        3.3:通过jstat查看堆内存使用情况：
+            堆内存各部分的使用量以及加载类的数量:java [-命令选项][vmid（进程id）][间隔毫秒][查询次数]
+            eg:查看class加载统计，jstat -class 5212(进程id，tomcat/BootStrap)；
+               查看编译统计，jstat -compiler 5212;
+               GC统计（常用）：jstat -gc 5212；
+               每秒打印一次，共十次：jstat -gc 1000 10；
+    4:jmap的使用以及内存溢出分析：比jstat更详细：内存使用情况汇总，内存溢出的定位与分析
+        4.1:查看内存使用情况：jmap -heap 5212(进程id)
+        4.2:查看内存中对象的数量以及大小：jmap -histo <pid> | more
+            活跃对象：jmap -histo:live <pid> | more(比较多用more管道符分页)；
+        4.3:使用内存情况dump到文件（快照）：jmap -dump:format=b(binary),file=dumpFIle <pid>
+                                        eg:jmap -dump:format=b,file=/tmp/dump.dat 5212
+        4.4:jhat对dump.dat二进制文件解析：jhat -port port file  => jhat -port 9999 /tmp/dump.dat,然后通过浏览器查看
+            文件的最下面有Object Query Languagea(像sql)，查看生产的堆大对象是否合理，oqlHelper有教程。
+            TODO 手写读取xml标签内容的java实现
+        4.5:MAT,memory analyzer tool :基于eclipe的插件，application中看到courrentHashMap;甚者可以观察谁阻止了
+            垃圾收集器的回收工作。
+                problem Suspect:可疑问题
+            开发工具->VM Options -> -Xmsxxoom -Xmxxxoom -XX:+HeapDumpOnOutOfMemoryError可以本地UAT测试
+                一个线程（main也好别的也罢）有很大比例的内存占有，就是suspect Problem
+    6:jstack的使用:需要查看jvm中线程的执行情况，如cpu的负载突然增高，出现死锁，死循环，不断的读取数据，
+        大文件的I/O等；而且日志也看不出什么问题。这就得借助jstack分析线程的快照。
+        6.1:jstacp pid -> jstack 5212
+            注意，线程的就绪态会将线程poll进一个队列中，等待分配cpu执行权。
+            阻塞态会将阻塞线程poll阻塞队列中。、一旦回去锁，线程进入就绪状态。
+            New->
+            Runable(Running,Ready)->
+            Blocked->
+            Waiting,Timed_Waited->
+            Terminated
+            TODO 详看多线程高并发淘宝买教程
+        6.2：死锁：线程无限等待……
+            eg:Thread-1/0:waiting to lock monitor(监控) 0x0012301203,which held(持有)
+                by Thread1/0
+                Found 1 deadlock;
+
+    7:VisualVM工具，jdk自带视图化工具 /jdk1.8.1_123/bin/jvisualvm.exe,
+        打开能自动找到（jps）相关java进程;
+        点击垃圾回收按钮==>System.gc();
+        线程dump查看线程状态，死锁也能看出，跟jstack样式一致；
+        抽样器：单位时间内（停止）的cpu内存使用情况，都是运行时live，而不是所有（参考4.1,4.2）
+        JMX:java Management Extensions,java管理扩展，为应用方程序，设备，系统植入的管理框架。
+            eg：监控远程tomcat需要其进行JMX配置；
+                远程tomcat配置 /tomcat/bin/catalina.sh->……百度，
+                    JAVA_OPTS="-Dcom.sun.management.jmxremote.*";
+                    1.允许使用JMX；
+                    2..port=9999 远程通信端口；
+                    3..authenticate=false 不进行身份认证，所有用户都能访问；（不安全）
+                    4..ssl=false 不进行ssl加密通信
+                本地jvisual debug：远程->主机ip：port
+                    1.远程 sz /tmp/dump.dat(二进制文件，所以不用编码) -> 文件->装入
+

@@ -1,0 +1,91 @@
+
+
+                                        Lison老师的高并发秒杀服务的秘密
+
+    1.行锁，表锁，页锁，乐观锁，悲观锁。基于数据库实现的，基于缓存实现的。
+    2.嘴对嘴教你。
+    3.行锁，锁定一行数据，
+eg:select name from goods_info where code = 'xiaomi' for update
+
+    4.页锁，分页后的锁，1行以上的数据。
+eg:select name from goods_info where code in('xiaomi','apple') for update
+
+    5.表锁，锁一张表
+eg:select name from goods_info for update
+
+    6.读锁，共享锁。没提交前可以继续别的线程 lock in SHARE MODE，但是不能 for update！！
+for update是排他锁，lock in SHARE MOD是共享锁……逻辑很好懂！
+eg:start TRANSACTION;
+   select name from goods_info where code = 'apple' lock in SHARE MODE;
+   COMMIT;
+
+   7.写锁，排他锁。没提交前（没释放锁），别的线程，加共享锁和排他锁都不行！简单的说就这句sql不是原子性！
+eg:start TRANSACTION;
+   select name form goods_info where code = 'apple' for update;
+   COMMIT;
+
+   8.悲观锁：行锁，表锁，页锁，读锁，写锁都是，写多读少的场景！自己线程锁了别人动不了，别人线程锁了就一直Blocking直到等到锁！
+一般只能依赖关系型数据库实现的。springmvc一个系统单进程的的syn和lock也能做悲观锁，但是现在的分布式（wms和中台和后台和门户都是分布式的就不行了）
+对外界修改保持悲观，因此在整个数据处理过程中，都处于锁定状态！
+
+   9.乐观锁：假设认为数据一般情况下不会造成冲突（先不加锁），所以在数据进行提交更新时候才会正式对数据惊醒
+冲突校验，若冲突则返回用户错误信息，让用户（程序员）决定如何做！
+数据库乐观锁，缓存乐观锁，读多写少，提高吞吞吐量
+eg1:update goods_info
+      set amout = amout - #{buys},version = version + 1
+        where code = #{code} and version = #{version}
+eg2:update goods_info
+    set amout = amout - #{buys}
+        where code = #{code} and amout - #{buys} >= 0
+    加锁周期很短，就更新一瞬间，而不是整个过程...数据库乐观锁简单可靠安全，但是并发低。
+eg3:Compare and swap 机制,redis基于watch指令在redis事务中提供cas的能力：读，比较，更新
+
+   10.自旋锁，while（true）一直等待那种模式；
+偏向锁，锁释放后，却又偏向刚才释放的那个线程；
+共享锁，CyclicBarrier就是共享锁思想：锁不止一个线程占用；
+
+   11.CAS就是缓存与实际数据同步的问题，cpu与内存缓存，内存与持久层缓存，juc的容器类Atomic类等等……
+
+   12.商品抢购：核心是修改库存；
+      群红包：核心是修改红包金额；
+      ……
+
+   13.@Autowried基于类型注入，@Resource基于名称注入，@Param("cpid")是mybatis多入参的函数上；
+
+   14.高并发编程重试线程的小技巧：TimeUnit.MILLIONSCOND.sleep(new Randon().nextInt(100));
+能防止递归重试系统一直没有机会让少量线程做CAS，大量线程做递归重试怼服务器加大服务器压力（递归很容易OOM）（错峰填谷）！！
+
+
+   15.高并发的瓶颈一般在db
+
+   TODO 16:<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">??这种xmlns究竟是啥
+
+   17.Fastjson<gson,但是gson是二进制的，序列化的对象不可读！
+
+   18.两次md5加密，防止彩虹表破解
+
+   19。jsr，，小东西
+
+   20。TODO @ControllerAdvice @ExceptionHandler是嘛玩意？？  全局异常那地的。。。
+
+   21。分布式session，集群。
+    现在的方案有的容器有原生的session同步，实现复杂，性能有问题；
+    redis存储用户session对象；
+服务器生成非堆成加密token返回客户端，
+以后客户端每次都携带这个token，服务器会刷新在线时间和用私钥解密识别用户；
+
+    22。数据库不金额小数，存分
+
+    23。TODO snowflack算法代替uuid和db自增长
+
+    24。所有折扣模块的商品和订单都得重新建表，商品表，秒杀商品表，拼团商品表，订单表，秒杀订单表，拼团订单表
+
+    25。TODO 重复提交表单？？@Token ？？
+
+    26。自己的service就引入自己的dao，非得引入别的dao，就引入别的service
+
+    27。jmeter，redis的qps = db qps*4；模拟用户带cookie：cvs data set config
+
+    28.TODO 高并发多用户jmeter压测秒杀超卖，库存为负
+
+    29。TODO @RabbitListener(queues=MQConfig.class)???嘛意思
