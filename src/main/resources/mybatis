@@ -1,0 +1,83 @@
+===//================//=================//================//=================//====
+            延时加载
+
+    1:延时加载：饿汉式单例，eg：若查询订单表并且表关联查询用户表信息，单表比关联多表快。先单表，按需再关联其他表
+        即是按需查询，按需dbOperate，<association/>（协会） <collection/> <resultMap>就能延时加载
+
+    2.java逻辑就能实现，没必要在sql的statemen写不精通也不好debug的sql代码（sql是面向过程的）
+        有点分治思想了
+mybatisConfig.xml:
+    <settings>
+        //全局懒加载
+        <setting name="lazyLoadingEnable" value="true">
+        //懒加载对象属值也懒加载初始化，消极加载
+        <setting name="aggressiveLazyLoading" value="false">
+    </settings>
+
+eg:OrderMapper.xml:
+    <mapper>
+        <resultMap type="../..pojo.Orders" id="findOrdersUserLazyLoadingResultMap">
+            <id column="id" property="id/>
+            <result column="user_id" property="userId"/>
+            <result column="number" property="number"/>
+            <result column="createtime" property="createtime"/>
+            <result column="note" property="note"/>
+            <!--Orders实例的User对象延时加载-->
+            <assocation property="user" javaType="../.pojo.User"
+                select="${namespace}.queryUserById"(关联sql的statementID)
+                column="user_id"(关联外键)/>
+        </resultMap>
+        <select id="findOrdersUserLazyLoading" resultMap="findOrdersUserLazyLoadingResultMap">
+            select * from orders
+        </select>
+    </mapper>
+
+====//==========================//=============================//=================
+    一，二级缓存
+
+    mybatis，用于操作db优化的机制实现（并没有优化db，只是优化javaPro），
+        以时间换空间，操作内存比操作磁盘肯定快点。
+        要是分布式了，这个意义就全无了。
+        mybatis的做缓存很一般，没压缩，没加密等等
+    1.一级操作db时，需要ThreadLocal里存入SqlSession对象,里面有个HashMap来做缓存来存储数据，SqlSession级别的。
+        a:第一次执行queryUserInfoByCode(int id),根据id为1的这条查询有无缓存，有则..无则反之....
+        b:要是中间这个SqlSesion执行了commit，则清空一级缓存，所有不同sql不同查询条件的所有缓存记录。
+        c:第二次同一个SqlSession还是那句sql,要是id=1，直接缓存取，不再打印sql语句啦。
+        d:默认开启，不需改配置文件
+    2.二级缓存确实跨越SqlSession的，堆共享，XXOOMapper.class（单例）级别,多个SqlSession实例操作同一个XXOOMapper.class.queryXX()。
+        a:默认关闭，mabatisConfig.xml：<setting name="cacheEnable" value="true"/>；
+            要对应的mapper.xml：<cache/>;
+            pojo impl Serializable(存储介质可能是磁盘，用于反序列化)
+        b:域肯定比一级大
+        c:按照namespace划分缓存区域的。
+        d:要是有sqlSession执行有缓存的mapper.sql.commit。则会清空此mapper.namespace二级缓存，此namespace所有不同sql和所有相同sql不同入参的缓存
+        e:数据结构还是个hashmap。
+        f:sqlSession.close()之后才写入二级缓存
+        g:cache hit ratio 缓存命中率：0.0 为零（查一次，命中零次），发出sql
+        h:<select...useCache="false" flushCache="true">..</select>个性化更小粒度的配置，mybatis刷新缓存就是清空缓存（不常用）
+        i:flushInterval刷新间隔
+        j:size引用数目
+        k:readOnly只读
+        l:回收策略：viction（赶出）:FIFO先进先出缓存对象数据数据结构，60s刷新
+                                   LRU，默认，最近最少使用的移除最长时间不被使用的
+                                   SOFT，软引用，移除基于垃圾回收状态和软引用规则的对象
+                                   WEAK，弱引用，更积极的移除基于垃圾回收状态和弱引用的对象
+        <cache eviction="FIFO" flushInterval="10000" size="512" readOnly="true"/>
+        m:一级缓存不经意间就用了，二级得手动搞，
+        n:针对慢查询和实时性不高的查询
+        o:对系粒度的缓存不友好，比如一个namespace的100w种商品（100w个productID）都二级缓存了，但是一个commit，缓存全清空！！
+        p:细粒度缓存就是三级缓存了。
+    3.SqlSession：在开启事务就创建SqlSession实例，事务实现在SqlSession中，aop控制，
+        只要service的method结束sqlSession关闭，所以service有多少mapper，都是一个SqlSession实例，
+        只要两个service是事务没有关系，即是传播不了，就是两个sqlsession，即是哪怕查同一sql同一id也不走一级缓存。
+    4.mybatis整合ehcache分布式缓存框架
+    5.TODO zookeeper的master能读写，salve只能读，跟redis主从一个理？
+    6.mybatis的Cache接口，method：getID()，getValue(k),putObject(k,v),removeValue(k),clean()
+        整合ehcache:
+        <mapper>
+            <cache type="org.mybatis.caches.ehcache.EhcacheCache"/>
+        </mapper>
+        然后新建配置文件:ehcache.xml
+
+    7.持久层逆向工程：就是 通用mapper(tk.mapper) 吧，只能单表。。。
+        还有就是，开发阶段表的设计会一直改。。。
