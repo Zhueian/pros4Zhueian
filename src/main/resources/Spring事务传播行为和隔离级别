@@ -1,0 +1,55 @@
+
+           捋清楚咯！！！
+    多个事务有关系时候的处理策略！
+
+    1.spring.TransactionDefinition接口规定了7种类的实事务传播行为
+    2.不属于事务实际提供方数据库行为
+    3.@Transaction(Propagation = 以下枚举)
+      a:PROPAGATION_REQUIRED,propagation_required:(传播，被需求)
+            若当前没事务则新建一个事务，如果存在就加入此事务中，可重入锁？？
+            eg:所有或复杂或简单的转账支付行为都得用这个。
+      b:PROPAGATION_SUPPORTS，propagation_supports
+            支持当前事务，若当前无事务，就以非事务方式执行
+      c:PROPAGATION_MANDATORY,propagation_mandatory(强制性)
+            使用当前事务，若当前无事务，则throws Exception
+      d:PROPAGATION_REQUIREDS_NEW，propagation_required_new
+            新建事务，如果当前存在事务，把当前事务挂起。
+            eg:清空购物车用这个，起码三层事务，能买就买，不能买拉倒，不能一件不能买所有都不能买。
+                面试：当时在uat禅道就有过bug，二次开发重写了单个购买的方法，就改了这个注解
+      e:PROPAGATION_NOT_SUPPORTED，propagation_not_supported
+            以非事务方式执行操作，如果当前存在事务，就把事务挂起
+      f:PROPAGATION_NEVER，propagation_never
+            以非事务方式执行，如果当前存在事务，throws Exception
+      g:PROPAGATION_NESTED，propagation_nested(嵌套)
+            若当前存在事务，则在嵌套事务内执行。若无，则执行类似PROPAFGATION_REQUIRED
+//========//======================//======================//=======================//========
+
+     applicationContent.xml:
+     <！--配置事务管理器-->
+     <bean id="transactionManager"
+        class="org.springframwork.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"></property>
+     </bean>
+     <!--启动事务注解-->
+     <tx:annotation-driven transaction-manager="transactionManager"/>
+//========//======================//======================//=======================//========
+    @Transaction()
+    isolation(隔离，以下枚举)
+        a:ISOLATION_DEFAULT,isolation_default,
+            表示使用bd底层默认隔离级别
+        b:ISOLATION_READ_UNCOMMITTRED,isolation_read_committed,
+            一个事务可以读取另一个事务修改未提交数据，幻读，重读，脏读
+        c:ISOLATION_READ_COMMITTED
+            一个事务只能读取另一个事务提交后的数据，推荐
+        d:ISOLATION_REPEATABLE_READ,isolation_repeatable_read,
+            一个事务只能在整个过程中可以多次重复执行某个查询，并且返回记录都是相同的，可以防止脏读，重读
+        e:ISOLAATION_SERIALIZABLE，isolation_serializable
+            所有事务依次逐个执行，串行的，所以说事务之间不会有干扰。但严重影响性能
+    noRollbackFor
+    noRollbackForClassName
+    propagation
+    readOnly
+    rollbackFor
+    rollbackForClassName
+    timeout
+    value
