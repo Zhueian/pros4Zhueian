@@ -1,0 +1,57 @@
+
+    1.静态页和ela索引库的增删改要同步别的微服务（page服务，search服务）别的service.method()同步数据。（库存等）
+    2.减少耦合，不必在原有逻辑硬编码，甚至切面编程
+    3.amqp&jms（java message service API） http https 基于tcp的dubbo upd等
+    4.spring-cloud-stream spring-cloud-bus官方底层实现就是rabbitmq
+    5.rabbitmq是erlang写的，源码不好读懂
+    6.rabbitmq.conf
+    7.设置开机启动，chkconfig rabbitmq-server on
+        开启:service rabbitmq-server start
+        Manager port：15672
+        amqp port:5672()
+            底层肯定是tcp 3，4挥手握手，确认通道连接
+        clustering:25672(集群)
+
+
+    8.Dashborad:
+    9.channels:通道，生产还是消费；connections：连接，无论生产还是消费都为一个连接
+
+    10.六种消息模型，RPC不是mq，是远程调用,broker:经纪人
+        simple:估计是个LinkedBlockingQueue,消息会暂存，有序
+        workqueue:多个消费者，一个生产者，单个消费者过慢，消息可能会溢出，消息丢失和消息堆积
+            能者多劳：有点workStealingPool:各个线程维护一个队列，闲的会偷取忙的队列的任务
+            channel.basicQos(1);//每次发一条消息给你消费，等ack后再发
+        发布/订阅模型  ：多一个exchange概念(nginx负载均衡？)，product-》exchange-》queue;
+          exchange不能存储消息，有点SynchrnousQueue.Transfer();
+          一定得绑定队列，exchange不暂存消息，否则会消息丢失
+            direct:rec:队列绑定有个rec：channel.queueBind("routingKey(del/update)"...args)
+                   send:channel.exchangeDeclare(.."dirct")；
+                        channel.basicPublish(..."routingkey(del)");
+            fanout(广播):send:发送给所有绑定此exchange的queue,一条消息被多个消费者一起消费'
+                              channel.exchangeDeclare(.."fanout")；
+                         rec：channel.queueBind(...args)
+            topics:跟direct比可用routingKey通配符:auto.#:auto.asd.qwe/auto.asd
+                                                 auto.*:auto.asd
+
+    11。消费者:
+        Blocking:new DefaultConsumer(){
+            @Overwrite
+            public void handleDeliver(...arges){
+
+            }
+        };
+        监听队列会自动ack（acknowlege确认）:通知mq收到了消息，可以删了
+    12.自动ack：拿到消息那一刻，但是执行代码块会可能throws 或 interrupt就会消息丢失；
+        手动sck：channel.basicAck(..args);
+                 channel.basicConsume(..fales..);
+
+    13.mq宕机:消息没消费的能持久化，重启不会丢失：
+        send:消息channel.basicPublish(...messageProperties.PERSISTENT_TEXT_PLAIN..);
+            交换机持久化:channel.exchangeDeclare(..PERSISTENT_TEXT_PLAIN)；
+        rec：    队列持久化。。。
+
+    14.网络延时，发送时间过长，没能即是收到ack，会重新发，就重发消息了。
+        发消息时候，持久化（mysql，redis）消息，记录状态（发送失败，发送成功未ack..），定时扫描mq表，没收到ack的重新发；
+            消息含有uuid表示服而不止有消息提
+            接收方从uuid实现幂等或者sql select，del；非幂等：@Token防止重复提交表单或逻辑完成记录时间1秒内同一个多次重复直接禁用ip一段时间
+        mq官方：publisher confirms and consumer Acknowlege：三次握手，四次挥手
