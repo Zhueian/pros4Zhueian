@@ -28,8 +28,8 @@ public class T217_存在重复元素 {
         if (nums.length < 2) return false;
         HashSet<Integer> a = new HashSet<>();
         for (int i = 0; i < nums.length; i++) {
-            a.add(nums[i]);
+            if (!a.add(nums[i])) return false;
         }
-        return a.size() != nums.length;
+        return true;
     }
 }
