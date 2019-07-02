@@ -28,6 +28,8 @@ public class T205_同构字符串 {
         if (s.length() < 2 && t.length() < 2) return true;
         HashMap<Character,Integer> toS = new HashMap<>();
         HashMap<Character,Integer> toT = new HashMap<>();
+        System.out.println(s.charAt(0)+1);
+        System.out.println(s.charAt(0)+256);
         StringBuffer sbs = new StringBuffer("");
         StringBuffer sbt = new StringBuffer("");
         int l = s.length();
@@ -46,8 +48,12 @@ public class T205_同构字符串 {
 
     public static void main(String[] args) {
 //        boolean isomorphic = isIsomorphic("aba", "baa");
-        boolean isomorphic2 = isIsomorphic("egg", "add");
+//        boolean isomorphic2 = isIsomorphic("egg", "add");
 //        boolean isomorphic3 = isIsomorphic("ab", "ab");
-        System.out.println(isomorphic2);
+//        System.out.println(isomorphic2);
+        int[] m = new int[512];
+        m[0] = m[9] = 99;
+        System.out.println(m[0]);
+        System.out.println(m[9]);
     }
 }
