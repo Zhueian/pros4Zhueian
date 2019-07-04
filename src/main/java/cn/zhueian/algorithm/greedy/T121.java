@@ -28,6 +28,7 @@ class T121_买卖股票的最佳时机 {
         }
         return r;
     }
+    //kadane舒徐归纳法
     public static int maxProfit2(int[] prices) {
         int maxCur = 0, maxSoFar = 0;
         for(int i = 1; i < prices.length; i++) {
