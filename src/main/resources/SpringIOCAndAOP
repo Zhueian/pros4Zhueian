@@ -1,0 +1,35 @@
+
+  //=============//==============//================//==============//===============//
+        BeanFactory!!
+    1.org.springframework.beans.factory.BeanFactory
+    2.(BeanFactory)new ClassPathXmlApplcationContext(String[] configuration)是上述接口一个实现，实例化容器
+        读取文件让spring管理
+    3.BeanFactory,以Factory结尾，表示为一个工厂类接口，用于管理Bean的工厂，是IOC容器的核心接口。
+        实例化Bean，scope=单例，lazy懒加载。可以InnerClass方法手写一个。
+        定位Bean，<bean id="" class="../..//">
+        配置应用程序中中的对象以及之间依赖：ref="${id}"
+
+         methods：
+                bool containsBean(String beanName)
+                obj getBean(String,Class)
+                Class getType(String name)
+                bool isSingleTon(Stirng)
+                String[] getAliases(String name)别名组
+
+  //=============//==============//================//==============//===============//
+        FactoryBean!!
+    1.以Bean结尾，表示为一个Bean，是class不是interface了，一个实现了FactoryBean<T>接口的Bean；
+      根据该Bean的ID从BeanFactory中获取FactoryBean对象的getObject()的return而不是FactoryBean本身；
+      若想获取
+
+  //=============//==============//================//==============//===============//
+  1。Spring ORM模块，spring整合其他持久底层框架的模块
+  2。ioc，inject bean能解藕；
+        a:将对象的创建权交给spring
+  3。AOP，面向切面编程。将交叉逻辑（auth，logger，tx）封装成一个切面，然后注入到目标对象的具体逻辑业务中。
+        a:Aspect_Oriented-Programming
+        b:extends,super.method(T)这么扩展程序；
+          implments，成员变量引入，xxooService.method(T)，组合原则，能不继承别继承；
+          硬编码，写死，无限迭代；
+        d:要是被代理的是class则用CGLIB，interface用JDKDynamic
+            org.springframework.aop.framework.DefaultAopProxyFactory.createAopProxy

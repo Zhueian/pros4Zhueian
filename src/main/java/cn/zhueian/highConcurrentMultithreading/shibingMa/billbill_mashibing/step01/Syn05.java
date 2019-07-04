@@ -17,9 +17,17 @@ public class Syn05 implements Runnable{
     }
 
     public static void main(String[] args) {
-        Syn05 t = new Syn05();
-        for (int i = 1; i < 10; i++) {
-            new Thread(t,"Thread" + i).start();
-        }
+//        Syn05 t = new Syn05();
+//        for (int i = 1; i < 10; i++) {
+//            new Thread(t,"Thread" + i).start();
+//        }
+        int a = 1;
+        a = a++;
+        int b = 1;
+        b = ++b;
+        System.out.println(b);
+        System.out.println(a);
     }
+
+
 }

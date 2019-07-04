@@ -1,0 +1,131 @@
+
+
+    1.数据库就是一个文件系统，把数据保存在特殊的文件里，并且需要固定语言sql去操作文件以及数据。
+    2.TODO 创建视图view 索引index，存储过程,单一和组合索引失效，二三范式的理解
+    3.过滤某个字段值整条记录,查最大价格详情：1.select * from tableName
+                                where price=(select max(price) as bieming from tableName);
+                             2.select * from tableName order by price desc limit 1;
+                             3.select * from tableName t1
+                                left join tableName t2 on t1.price < t2.price
+                                    where t2.airtice IS NULL;(一般人不这么写)
+    4.分组去重topn：1.select article,max(price) as p
+                        from tableName
+                            group by article;
+                   2.select * from tableName t1
+                        where price=(select max(t2.price) from tableName t2
+                            where  t1.article=t2.article);(一般人不这么写)
+    5.删库删表：drop database/table name;
+    6.备份:mysqldump -uroot -p12345 databaseName > ../pwdUrl fileName.sql
+        注意，备份只是表及其数据，不会创建数据库。
+      恢复:mysql -uroot -p12345 databaseName<fileName.sql
+    7.exists:select from a where exetis(selec a_id from b)
+        表示存在，当子查询的结果存在，就会显示主查询中的所有数据
+    8.union / union all:将不同表中相同列中的查询数据显示出来，前者去重，后者不去重
+    9.case when:
+        select * ,
+        case
+            when salary>10000 then "hight"
+            when salary<=500 then "low"
+        end as level
+        case sex
+            when "female" then 0
+            when "male" then 1
+        end as flag
+            from employee;(临时表会新增level，flag两列)
+    10.特殊的加表载数据方法：load data local infile '../pwdUrl/fileName.txt' into table tableName;
+                            source ../xx.sql
+    11.汉字：utf-8：3byte；gbk：2byte；
+        select length(fieldName) from tableName
+       decimal(m,d)定点数，double/float浮点数是近似值
+       intXX(),括号里面的是取值，不是占字节数，都是内置固定好；XXchar(),括号里的都是固定占字节数
+       字符串检索速度：char>varchar
+       varchar能直接创建索引，text要指定前几个字符建索引
+       二进制数据：Blob，一般是图片，视频等
+       unsigned无符号:eg:tinyint,signed -128~127;unsigned 0-255；
+        性能：signed<unsigned，假如查询500以下的数据，unsigned:0~500,signed:-2147483648~500
+    12.null / not null / <=>:mysql null处理比较特殊，聚合函数时慎用，少用，用tinyint 0/1处理
+    13.alert修改表名/字段名：alert table tablename drop fieldName;
+                            alert table tablename add fielename int;
+                            alert table tablename modify fieldname char(10);
+                            alert table tablename rename to tablename2;
+    14.sql内置函数，感觉没啥用，java都能在service层实现，不必在dao层编写，真要用查文档即可，相当简单
+    15.一个表可以有多个单列索引，但这不是组合索引；组合索引：一个索引包含多个列。
+        索引像字典，如把"你"字的"人"字旁抽出来，所有的公共部分"人"，"扌"，"艹"等组成另一个更小的表，指向实体表，向上抽取思想。
+        索引应用where子句字段；
+        写操作的表和字段，少建索引，B B+树重构很费事；
+        创建普通索引：create index indexname on tablename(fieldname):
+                create index idz on autohr (id);id->int
+                create index namez on author (username(10));username->varchar(10)；
+                修改：alert table tablename add index in
+        唯一索引：单一索引列的值必须唯一（id，uuidCode，orderCode，主键等），允许为空；组合索引的列值的组合必须唯一。
+            create unique index indexName on tableName(fieldName(length))
+            ...
+    16.mysql事务:
+        1.start transaction commit,rollback,
+        2.  savepoint identifiter(事务保存点)；(快照点)
+            release savepoint identifiter,删除保存点
+            rollback to identifiter，回滚到保存点。
+        3.set autocommit = 0 禁止自动提交
+    17.数据模型：三要素 数据结构，数据操作，数据约束。
+    18.数据库设计：
+        ER基本要素：实体，属性，键码，关系
+        范式：符合某一规规范级别的关系模型的集合。七种范式：
+            1：一个关系模型R的所有属性都是不可分割的基本数据项，强调列的原子性。
+                eg：student(s_no,s_name,s_dept,s_location,s_phone,s_sex)
+                电话能分家庭电话和工作电话和个人电话，如此设计的表不符合1nf。
+            2:基于1nf，且每个非主属性都是完全函数依赖于主键，模型R符合2nf
+                eg:
+            3：TODO
+    19：并发的控制：
+        1.并发调度的可串行化
+        2.排他锁：for update；共享锁：。。TODO
+        3.活锁：存在理论：某个事务永远等待状态，得不到封锁状态，能队列策略预防。
+            死锁：jdk死锁一样。
+
+
+======//=========//==========//==========///==========//=============//===========//==========//==========
+        优化：！！！
+    1.db优化：sql以及索引，数据库表结构，系统配置，硬件。
+    2.TODO 表结构生成工具 powerDisigner
+    3.查看是否看起慢查日志：show variables like 'slow_query_log'
+      设置日志位置：set gloabal slow_query_log = '../mysql-slow.log'
+      设置慢查询日志：set global log_queries_not_using indexes=on
+          log_queries_not_using_indexes  | on
+          slow_query_log                 | on
+          slow_query_log_file            | ../mysql-slow.log
+      慢查询自定义：set global long_query_time=1(s)
+      监控日志：tail -f ../mysql-slow.log
+      慢查询日志内容：Rows_sent:所发送的行数（数据库行）；Rows_examined:锁扫描的行数（数据库行）
+    4.mysql慢日志分析工具：mysqldumpslow:这个工具没啥用
+        mysqldumpslow -h（help）：
+            -t num:top n查询
+            -v :版本
+    5.dba必须掌握的十大工具之首：pt-query-digest
+        pt-summer:检查mysql server信息
+        pt-diskstats:磁盘信息
+        pt-mysql-summary --user=root --password=123456:查看数据库信息
+        pt-query-digest ../xx-slow.log 分析慢查查询日志
+        pt-slave-find --host=localhost --user=root --p-123455：查看从库信息和同步情况
+        pt-deadlock-logger --user=root --p=123455：查看死锁信息
+        pt-index-usage slow_xx.log 查看慢日志索引信息
+        pt-duplicate-key-checker --host=localhot --p=123456：查看重复索引
+        pt-ioprofile：查看表和文件当前io开销
+        查找库里大于2G的表：
+            pt-find --user=root --p=123445 --tablesize +2G
+        查找表和索引大小并排序：
+            pt-find--user=root --p=123 --printf "%T\t%D.%N\n" | sort rn
+        显示查询时间大于60s的查询：
+            pt-kill --user=root --p=123 --busy-time 60 --print
+        kill：
+            pt-kill --user=root --p=123 --busy-time 60 --kill TODO 什么意思，杀死日志记录？？
+    6.综上：
+        查询次数多且每次查询时长长的sql；
+        大io：Rows examine扫描行多的；
+        Rows examine/Rows send：索引命中率
+    7.explain执行计划：eg:TODO 看看别的文章，我操，传智这个加薪太坑了
+        explain select * from staff;
+        id   select_type  table   type   possible_keys   key              key_len    ref    rows    Extra
+        1    simple       staff   All    null            idx_fk_store_id  1          null   2       using index
+        id:TODO id列数字越大越先执行，如果说数字一样大，那么就从上往下依次执行，id列为null的表是结果集，不需要他来查询
+        select_type:a-h个我操
+
