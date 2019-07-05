@@ -17,7 +17,7 @@ package cn.zhueian.algorithm.greedy;
  * 输出: 0
  * 解释: 在这种情况下, 没有交易完成, 所以最大利润为 0。
  */
-class T121_买卖股票的最佳时机 {
+public class T121_买卖股票的最佳时机 {
     public int maxProfit(int[] prices) {
         int r = 0,l = prices.length;
         for (int i = 0; i < l-1; i++) {
