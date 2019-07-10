@@ -32,17 +32,11 @@ public class T605_种花 {
             boolean all = count >= 1 && i == l-1 && count == l;
             if (count>=1){
                 //居中
-                if (mid){
-                    r+=count%2 == 0?(count-2)/2:(count-1)/2;
-                }
+                if (mid) r+=count%2 == 0?(count-2)/2:(count-1)/2;
                 //左右倾斜
-                if (lr){
-                    r+=(count%2 == 0?(count)/2:(count-1)/2);
-                }
+                if (lr) r+=(count%2 == 0?(count)/2:(count-1)/2);
                 //全量倾斜
-                if (all){
-                    r = count%2 == 0?count/2:(count+1)/2;
-                }
+                if (all) r = count%2 == 0?count/2:(count+1)/2;
             }
             if (flowerbed[i] == 1) count = 0;
         }
