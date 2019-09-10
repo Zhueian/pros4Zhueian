@@ -9,11 +9,9 @@
         <module name="miaosha_idea" />
       </profile>
     </annotationProcessing>
-  </component>
-  <component name="JavacSettings">
-    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="miaosha_idea" options="-parameters" />
-      <module name="proDemo4Interview" options="-parameters" />
-    </option>
+    <bytecodeTargetLevel>
+      <module name="miaosha_idea" target="1.7" />
+      <module name="proDemo4pro4Interview" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/miaosha_idea/miaosha_idea.iml" filepath="$PROJECT_DIR$/miaosha_idea/miaosha_idea.iml" />
+      <module fileurl="file://$PROJECT_DIR$/proDemo4pro4Interview.iml" filepath="$PROJECT_DIR$/proDemo4pro4Interview.iml" />
+    </modules>
+  </component>
+</project>
