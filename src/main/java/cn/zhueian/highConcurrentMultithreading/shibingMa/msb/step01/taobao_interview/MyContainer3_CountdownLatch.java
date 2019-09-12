@@ -23,7 +23,7 @@ public class MyContainer3_CountdownLatch {
         CountDownLatch latch = new CountDownLatch(1);
         CountDownLatch latch2 = new CountDownLatch(1);
 
-        //TODO t2代码块和t1代码块相互位置会有不同效果，，，非得加TimeUtil.SECONED.sleep(int time)??老马这个程序不完美啊
+        //TODO t2代码块和t1代码块相互位置会有不同效果，，，非得加TimeUtil.SECONED.sleep(int time)??src这个程序不完美啊
 
         //add线程 t1
         new Thread(() -> {

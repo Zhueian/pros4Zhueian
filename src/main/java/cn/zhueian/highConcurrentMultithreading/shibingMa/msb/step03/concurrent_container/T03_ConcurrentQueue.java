@@ -6,7 +6,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * @Auther: qiucy
  * @Date: 2019-04-26 12:49
- * @Description:在并发容器中queue dueue是最重要，应用最多的
+ * @Description:在并发容器中queue dueue是最重要，应用最多的，
+ * 还是避开syn那套：cas+volatile
+
  * TODO 异步方案：用队列解耦？
  */
 public class T03_ConcurrentQueue {

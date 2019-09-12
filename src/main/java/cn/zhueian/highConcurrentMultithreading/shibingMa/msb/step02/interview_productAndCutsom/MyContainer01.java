@@ -12,7 +12,7 @@ import java.util.LinkedList;
  */
 public class MyContainer01<T> {
 
-    //TODO 有bug我操
+    //TODO src有bug我操
     //get put肯定要加锁，不然会超生和超卖，getCount也加锁
     //满了put得阻塞，空了get要阻塞
     private /*final*/ volatile LinkedList<T> list = new LinkedList<>();

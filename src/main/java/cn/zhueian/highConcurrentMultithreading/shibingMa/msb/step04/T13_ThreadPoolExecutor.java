@@ -27,4 +27,27 @@ public class T13_ThreadPoolExecutor {
         new SynchronousQueue<Runnable>();
         new ConcurrentLinkedQueue<Runnable>();
     }
+    //linux的较低版本内核调度函数src,java线程调度有优先级，但体现得不明显；
+    //猜测：jvm是上层应用，现在普通os是无法识别也还没能学习识别上层应用IOBound和CPUBound
+    // 这个倒是很明显，比如鼠标得硬件中断，优先级极高
+//    void _schedule(void){
+//        while(1){
+//            c = -1,next = 0,i = NR_TASK,p = &task[NR_TASK];
+//            while (--i){
+                  //这个counter是时间片
+//                if ((*p->state == TASK_RUNNING) && (*p)->counter>c)
+//                    c = (*p)->counter,next = i;
+//            }
+              //找到时间片最大得跳出，很明显IOBound得时间片都很小，但优先级高；
+//            if (c) break;
+//            for (p = &LAST_TASK;p>&FIRST_TASK;--p)
+                  //这个counter是优先级。
+                  // 算法很妙，调度算法出发是很频繁得，所以必须时空O要小，一个counter即是时间片变量也是优先级变量，一个进程只需维护一个变量；
+                  //又移保证优先级是有界收敛，不会无限大，不至于存在优先级无限小的程序，永远没法得到时间片。O:c(t)=c(t-1)/2+p;c(0)=p,,ps：看着像机器学习我操
+//                (*p) -> counter = ((*p)->counter>>1)+(*p)->priority;
+              //切换
+//            switch_to(next);
+//
+//        }
+//    }
 }

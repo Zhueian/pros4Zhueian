@@ -13,7 +13,7 @@ import java.util.concurrent.locks.ReentrantLock;
  */
 public class ReentranLock05 extends Thread{
     //比较true和false
-    //TODO 妈的老马的源码有bug
+    //TODO 妈的src的源码有bug
     private static ReentrantLock lock = new ReentrantLock(true);
 //    final static Lock lock = new ReentrantLock(true);
 
