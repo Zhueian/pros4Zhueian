@@ -1,4 +1,4 @@
-package cn.zhueian.geektime.juc01;
+package cn.zhueian.highConcurrentMultithreading.shibingMa.juc01;
 
 /**
  * Created by qiucy on 2019/9/2.
@@ -25,7 +25,7 @@ public class T01_singleton {
         if (instance == null){
             synchronized (T01_singleton.class){
                 if (instance == null) {
-                    instance = new T01_singleton();
+                    instance = new T01_singleton();//
                 }
             }
         }

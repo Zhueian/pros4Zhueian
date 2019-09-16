@@ -1,4 +1,4 @@
-package cn.zhueian.geektime.juc01;
+package cn.zhueian.highConcurrentMultithreading.shibingMa.juc01;
 
 /**
  * Created by qiucy on 2019/9/2.

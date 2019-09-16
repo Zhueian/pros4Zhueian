@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.concurrent.*;
 
 @Service
-@Slf4j
+//@Slf4j
 public class TPService {
 
 //    @Autowired
@@ -52,7 +52,7 @@ public class TPService {
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
-                    log.info("exec status:"+exec);
+//                    log.info("execute status:"+exec);
                     boolean shutdown = exec.isShutdown();
                 }
             }
@@ -77,7 +77,7 @@ public class TPService {
                 }
             });
         } catch (Exception e) {
-            log.error("synMsg4Kafk meet error:", e);
+//            log.error("synMsg4Kafk meet error:", e);
         }
     }
 }
