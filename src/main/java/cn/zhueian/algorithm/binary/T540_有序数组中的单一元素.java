@@ -28,21 +28,29 @@ public class T540_有序数组中的单一元素 {
             if (!set.add(nums[i])) set.remove(nums[i]);
         return set.iterator().next();
     }
+
     /**
      * BINARY
-     * @param nums
+     * @param
      * @return
      */
     public int singleNonDuplicate2(int[] nums) {
-        int l = nums.length;
-        int mid = l/2;
-        if (nums[mid] == nums[mid-1]){
 
-        }else if(nums[mid] == nums[mid+1){
+        System.out.println();
+        return 0;
+    }
 
-        }else return nums[mid];
+    public static int binFind(int[] nums,int key){
+        for (int l = 0,r = nums.length-1;l<=r;){
+            int m = l+(r-l)/2;
+            if (nums[m] == key) return m;
+            else if (nums[m] > key) r = m-1;
+            else l = m+1;
+        }
+        return -1;
     }
     public static void main(String[] args) {
-
+        int[] a = {1,4,5,7,9,22,42};
+        System.out.println(binFind(a,7));
     }
 }
