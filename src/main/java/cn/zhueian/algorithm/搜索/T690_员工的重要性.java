@@ -54,6 +54,21 @@ public class T690_员工的重要性 {
         return res;
     }
 
+    /**
+     * best
+     * @param employees
+     * @param id
+     * @return
+     */
+    public int best(List<Employee> employees, int id){
+        return employees.
+                stream().
+                filter(e -> e.id == id).
+                mapToInt(e -> e.importance + e.subordinates.stream().mapToInt(s -> getImportance(employees, s)).
+                        sum()).
+                sum();
+    }
+
 
     public static void main(String[] args) {
         T690_员工的重要性 t = new T690_员工的重要性();
