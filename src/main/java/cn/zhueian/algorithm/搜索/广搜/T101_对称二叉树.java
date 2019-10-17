@@ -1,4 +1,4 @@
-package cn.zhueian.algorithm.搜索;
+package cn.zhueian.algorithm.搜索.广搜;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -50,9 +50,27 @@ public class T101_对称二叉树 {
         return res;
     }
 
+    /**
+     * best
+     * @param root
+     * @return
+     */
+    public boolean isSymmetric2(TreeNode root) {
+        return root==null || isSymmetricHelp(root.left, root.right);
+    }
+
+    private boolean isSymmetricHelp(TreeNode left, TreeNode right){
+        if(left==null || right==null)
+            return left==right;
+        if(left.val!=right.val)
+            return false;
+        return isSymmetricHelp(left.left, right.right) && isSymmetricHelp(left.right, right.left);
+    }
+
     public static void main(String[] args) {
         T101_对称二叉树 t = new T101_对称二叉树();
         System.out.println(t.isSymmetric(null));
+
     }
 }
 class TreeNode {

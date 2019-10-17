@@ -1,4 +1,4 @@
-package cn.zhueian.algorithm.搜索;
+package cn.zhueian.algorithm.搜索.广搜;
 
 import java.util.*;
 

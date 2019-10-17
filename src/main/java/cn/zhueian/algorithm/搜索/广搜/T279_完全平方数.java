@@ -1,10 +1,9 @@
-package cn.zhueian.algorithm.搜索;
+package cn.zhueian.algorithm.搜索.广搜;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
-import java.util.stream.Collectors;
 
 /**
  * Created by qiucy on 2019/10/8.
