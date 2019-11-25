@@ -3,6 +3,7 @@ package cn.zhueian.algorithm.搜索.深搜;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.TreeMap;
 
 /**
  * Created by qiucy on 2019/10/17.
@@ -34,14 +35,17 @@ public class T104_二叉树的最大深度 {
             TreeNode left = pop.left;
             TreeNode right = pop.right;
             if (left!=null){
+                comPlace.push(left);
 
+            }
+            if (right!=null){
+                comPlace.push(right);
             }
         }
         return res;
     }
     public int maxDepth2(TreeNode root) {
-        if (root==null) return 0;
-        return 1+Math.max(maxDepth2(root.left),maxDepth2(root.right));
+        return root == null?0:1+Math.max(maxDepth2(root.left),maxDepth2(root.right));
     }
     class TreeNode {
         int val;
@@ -49,4 +53,5 @@ public class T104_二叉树的最大深度 {
         TreeNode right;
         TreeNode(int x) { val = x; }
     }
+
 }

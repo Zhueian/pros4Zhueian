@@ -21,11 +21,11 @@ public class T10_SchedulePool {
         //500：周期为500ms
         service.scheduleAtFixedRate(() -> {
             try {
-                TimeUnit.MILLISECONDS.sleep(new Random().nextInt(1000));
+                TimeUnit.MILLISECONDS.sleep(new Random().nextInt(10));
                 System.out.println(Thread.currentThread().getName());
-            } catch (InterruptedException e) {
+            } catch (Exception e) {
                 e.printStackTrace();
             }
-        },0,500, TimeUnit.MILLISECONDS);
+        },0,1, TimeUnit.MILLISECONDS);
     }
 }

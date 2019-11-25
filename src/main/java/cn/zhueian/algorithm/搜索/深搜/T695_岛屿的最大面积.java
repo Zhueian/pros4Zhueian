@@ -1,5 +1,8 @@
 package cn.zhueian.algorithm.搜索.深搜;
 
+import java.io.File;
+import java.util.HashMap;
+
 /**
  * Created by qiucy on 2019/10/16.
  * 给定一个包含了一些 0 和 1的非空二维数组 grid , 一个 岛屿 是由四个方向 (水平或垂直) 的 1 (代表土地) 构成的组合。
@@ -33,5 +36,11 @@ public class T695_岛屿的最大面积 {
     public int maxAreaOfIsland(int[][] grid) {
         int res = 0;
         return res;
+    }
+
+    public static void main(String[] args) {
+        File file = new File("");
+        long l = file.lastModified();
+        new HashMap<>();
     }
 }
