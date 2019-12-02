@@ -28,7 +28,7 @@ public class T112_路径总和 {
     //递归
     private boolean hasPathSum(TreeNode root,int val) {
         if (root == null) return false;
-        if (root.left == null && root.right == null) return val == root.val;
+        if (root.left == null && root.right == null && val == root.val) return true;
         return hasPathSum(root.left,val-root.val) || hasPathSum(root.right,val-root.val);
     }
     //DFS
