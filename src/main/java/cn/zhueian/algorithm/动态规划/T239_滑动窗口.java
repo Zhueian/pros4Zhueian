@@ -1,6 +1,8 @@
-package cn.zhueian.algorithm.其他;
+package cn.zhueian.algorithm.动态规划;
 
+import java.util.ArrayDeque;
 import java.util.Arrays;
+import java.util.Deque;
 
 /**
  * Created by qiucy on 2019/12/16.
@@ -44,5 +46,40 @@ public class T239_滑动窗口 {
             t[j] = nums[i+j];
         }
         return t;
+    }
+    //动态规划
+    public static int[] maxSlidingWindow2(int[] a, int k) {
+        int n = a.length;
+        if (n * k == 0) return new int[0];
+        if (k == 1) return a;
+
+        int [] left = new int[n];
+        left[0] = a[0];
+        int [] right = new int[n];
+        right[n - 1] = a[n - 1];
+        for (int i = 1; i < n; i++) {
+            // from left to right
+            if (i % k == 0) left[i] = a[i];  // block_start
+            else left[i] = Math.max(left[i - 1], a[i]);
+
+            // from right to left
+            int j = n - i - 1;
+            if ((j + 1) % k == 0) right[j] = a[j];  // block_end
+            else right[j] = Math.max(right[j + 1], a[j]);
+        }
+
+        int [] output = new int[n - k + 1];
+        for (int i = 0; i < n - k + 1; i++)
+            output[i] = Math.max(left[i + k - 1], right[i]);
+
+        return output;
+    }
+
+    public static void main(String[] args) {
+        int[] a = {1,3,-1,-3,5,3,6,7};
+        int[] ints = maxSlidingWindow2(a, 3);
+        for (int s:ints){
+            System.out.print(s+" ");
+        }
     }
 }

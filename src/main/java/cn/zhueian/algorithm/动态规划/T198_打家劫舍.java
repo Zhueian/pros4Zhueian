@@ -23,8 +23,16 @@ package cn.zhueian.algorithm.动态规划;
 public class T198_打家劫舍 {
     //
     public int rob(int[] nums) {
-        int res = 0;
+        int ans = 0;
+        int length = nums.length;
+        int[] currToThis = new int[length];
+        for (int i = 0; i < length; i++) {
+            if (i == 0) currToThis[i] = nums[i];
+            if (i != 0){
+                int tempMaxSum = 0;
 
-        return res;
+            }
+        }
+        return ans;
     }
 }
